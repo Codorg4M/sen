@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Ride Requests – RideShare{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+        <h2 style="color: var(--primary); margin: 0;">Passenger Ride Requests</h2>
+        <p style="color: var(--gray-600); font-size: 0.95rem; margin-top: 0.25rem;">
+            Review incoming seat requests for your posted journeys and confirm or decline bookings.
+        </p>
+    </div>
+    <a href="{{ url_for('driver.dashboard') }}" class="btn btn-outline btn-sm">← Back to Dashboard</a>
+</div>
+
+{% if requests %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Passenger</th>
+                        <th>Route</th>
+                        <th>Date & Departure</th>
+                        <th>Seats Requested</th>
+                        <th>Total Fare</th>
+                        <th>Seats Remaining</th>
+                        <th>Decision Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                        <tr>
+                            <td>#BK-{{ req['id'] }}</td>
+                            <td>
+                                <strong>{{ req['rider_name'] }}</strong><br>
+                                <span style="font-size: 0.8rem; color: var(--gray-600);">
+                                    📞 {{ req['rider_phone'] }}<br>
+                                    ✉️ {{ req['rider_email'] }}
+                                </span>
+                            </td>
+                            <td>
+                                <div><span class="route-dot pickup" style="display:inline-block; margin-right:4px;"></span> {{ req['pickup_location'] }}</div>
+                                <div><span class="route-dot destination" style="display:inline-block; margin-right:4px;"></span> {{ req['destination'] }}</div>
+                            </td>
+                            <td>
+                                {{ req['ride_date'] }}<br>
+                                <small style="color: var(--gray-600);">{{ req['departure_time'] }}</small>
+                            </td>
+                            <td>
+                                <strong>{{ req['seats_requested'] }} Seat(s)</strong>
+                            </td>
+                            <td>
+                                <strong style="color: #15803d; font-size: 1rem;">₹{{ "%.0f"|format(req['total_fare']) }}</strong>
+                            </td>
+                            <td>
+                                <span style="font-weight: 600; color: var(--secondary);">{{ req['available_seats'] }} Available</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.4rem;">
+                                    <!-- Accept Booking (Section 4 & 15) -->
+                                    <form action="{{ url_for('driver.accept_request', booking_id=req['id']) }}" method="POST" onsubmit="return confirm('Accept this booking? Seats will be reserved and rider notified.');">
+                                        <button type="submit" class="btn btn-success btn-sm">✓ Accept</button>
+                                    </form>
+                                    <!-- Reject Booking -->
+                                    <form action="{{ url_for('driver.reject_request', booking_id=req['id']) }}" method="POST" onsubmit="return confirm('Reject this booking?');">
+                                        <button type="submit" class="btn btn-danger btn-sm">✕ Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📬</div>
+        <h3>No Pending Requests</h3>
+        <p style="color: var(--gray-600); margin-bottom: 1rem;">
+            You currently have no pending ride requests waiting for your approval.
+        </p>
+        <a href="{{ url_for('driver.my_rides') }}" class="btn btn-primary">Check My Rides</a>
+    </div>
+{% endif %}
+{% endblock %}

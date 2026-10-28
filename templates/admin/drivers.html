@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Driver Management – Admin Console{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+        <h2 style="color: var(--primary); margin: 0;">Verified Drivers</h2>
+        <p style="color: var(--gray-600); font-size: 0.95rem; margin-top: 0.25rem;">
+            List of drivers, vehicle registration numbers, driving licenses, and total posted rides.
+        </p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline btn-sm">← Back to Console</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Driver ID</th>
+                    <th>Driver Name & Contact</th>
+                    <th>License Number</th>
+                    <th>Vehicle Details</th>
+                    <th>Total Seats</th>
+                    <th>Rides Posted</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in drivers %}
+                    <tr>
+                        <td>#DRV-{{ d['id'] }}</td>
+                        <td>
+                            <strong>{{ d['name'] }}</strong><br>
+                            <small style="color: var(--gray-600);">📞 {{ d['phone'] }} • {{ d['email'] }}</small>
+                        </td>
+                        <td><code>{{ d['license_number'] }}</code></td>
+                        <td>
+                            <strong>{{ d['vehicle_type'] }}</strong> ({{ d['vehicle_model'] }})<br>
+                            <span style="font-size: 0.8rem; color: var(--gray-600);">Reg: {{ d['vehicle_number'] }}</span>
+                        </td>
+                        <td>{{ d['total_seats'] }} Seats</td>
+                        <td><strong>{{ d['total_rides'] }}</strong></td>
+                        <td><span class="badge badge-{{ d['account_status'] }}">{{ d['account_status'] }}</span></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

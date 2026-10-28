@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}All Platform Rides – Admin Console{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+        <h2 style="color: var(--primary); margin: 0;">Platform Rides Overview</h2>
+        <p style="color: var(--gray-600); font-size: 0.95rem; margin-top: 0.25rem;">
+            Monitor all posted itineraries and remove spam or invalid listings.
+        </p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline btn-sm">← Back to Console</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ride ID</th>
+                    <th>Driver</th>
+                    <th>Route</th>
+                    <th>Date & Departure</th>
+                    <th>Vehicle</th>
+                    <th>Seats Left</th>
+                    <th>Fare</th>
+                    <th>Status</th>
+                    <th>Total Bookings</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rides %}
+                    <tr>
+                        <td>#RD-{{ r['id'] }}</td>
+                        <td>
+                            <strong>{{ r['driver_name'] }}</strong><br>
+                            <small style="color: var(--gray-600);">{{ r['driver_email'] }}</small>
+                        </td>
+                        <td>
+                            <div><span class="route-dot pickup" style="display:inline-block; margin-right:4px;"></span> {{ r['pickup_location'] }}</div>
+                            <div><span class="route-dot destination" style="display:inline-block; margin-right:4px;"></span> {{ r['destination'] }}</div>
+                        </td>
+                        <td>
+                            {{ r['ride_date'] }}<br>
+                            <small style="color: var(--gray-600);">{{ r['departure_time'] }}</small>
+                        </td>
+                        <td>{{ r['vehicle_type'] }}</td>
+                        <td><strong>{{ r['available_seats'] }}</strong></td>
+                        <td>₹{{ "%.0f"|format(r['fare_per_passenger']) }}</td>
+                        <td><span class="badge badge-{{ r['status']|lower }}">{{ r['status'] }}</span></td>
+                        <td>{{ r['total_bookings'] }}</td>
+                        <td>
+                            <form action="{{ url_for('admin.delete_ride', ride_id=r['id']) }}" method="POST" onsubmit="return confirm('Permanently delete this ride? This will remove all associated bookings.');">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

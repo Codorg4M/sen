@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}All Bookings – Admin Console{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+        <h2 style="color: var(--primary); margin: 0;">Platform Booking Transactions</h2>
+        <p style="color: var(--gray-600); font-size: 0.95rem; margin-top: 0.25rem;">
+            Full audit log of all rider reservation requests and driver responses.
+        </p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline btn-sm">← Back to Console</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Rider</th>
+                    <th>Driver</th>
+                    <th>Route</th>
+                    <th>Schedule</th>
+                    <th>Seats Booked</th>
+                    <th>Total Fare</th>
+                    <th>Status</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                    <tr>
+                        <td>#BK-{{ b['id'] }}</td>
+                        <td>
+                            <strong>{{ b['rider_name'] }}</strong><br>
+                            <small style="color: var(--gray-600);">{{ b['rider_email'] }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ b['driver_name'] }}</strong><br>
+                            <small style="color: var(--gray-600);">{{ b['driver_email'] }}</small>
+                        </td>
+                        <td>
+                            <div>{{ b['pickup_location'] }} ➔ {{ b['destination'] }}</div>
+                        </td>
+                        <td>
+                            {{ b['ride_date'] }} @ {{ b['departure_time'] }}
+                        </td>
+                        <td><strong>{{ b['seats_requested'] }} Seat(s)</strong></td>
+                        <td><strong style="color: #15803d;">₹{{ "%.0f"|format(b['total_fare']) }}</strong></td>
+                        <td><span class="badge badge-{{ b['status']|lower }}">{{ b['status'] }}</span></td>
+                        <td><small>{{ b['booking_date'] }}</small></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

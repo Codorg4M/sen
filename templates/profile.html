@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}User Profile – RideShare{% endblock %}
+
+{% block content %}
+<div style="max-width: 650px; margin: 1.5rem auto;">
+    <div class="card">
+        <div class="card-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="user-avatar-circle" style="width: 44px; height: 44px; margin: 0; font-size: 1.25rem;">
+                    {{ user['name'][0]|upper }}
+                </div>
+                <div>
+                    <h2 class="card-title" style="margin: 0;">{{ user['name'] }}</h2>
+                    <span class="role-badge {{ user['role'] }}">{{ user['role'] }}</span>
+                </div>
+            </div>
+            <span class="badge badge-active">Active Account</span>
+        </div>
+
+        <form action="{{ url_for('main.profile') }}" method="POST">
+            <h4 style="color: var(--primary); margin-bottom: 0.75rem;">Personal Information</h4>
+
+            <div class="form-group">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ user['name'] }}" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ user['email'] }}" required>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" value="{{ user['phone'] }}" required>
+                    </div>
+                </div>
+            </div>
+
+            {% if user['role'] == 'driver' and driver_info %}
+                <h4 style="color: var(--secondary); margin: 1.5rem 0 0.75rem; border-top: 1px solid var(--gray-200); padding-top: 1rem;">
+                    Driver & Vehicle Specifications
+                </h4>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="license_number" class="form-label">License Number</label>
+                            <input type="text" id="license_number" name="license_number" class="form-control" value="{{ driver_info['license_number'] }}" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="vehicle_type" class="form-label">Vehicle Type</label>
+                            <select id="vehicle_type" name="vehicle_type" class="form-control" required>
+                                <option value="Sedan" {% if driver_info['vehicle_type'] == 'Sedan' %}selected{% endif %}>Sedan</option>
+                                <option value="Hatchback" {% if driver_info['vehicle_type'] == 'Hatchback' %}selected{% endif %}>Hatchback</option>
+                                <option value="SUV" {% if driver_info['vehicle_type'] == 'SUV' %}selected{% endif %}>SUV</option>
+                                <option value="Auto/Bike" {% if driver_info['vehicle_type'] == 'Auto/Bike' %}selected{% endif %}>Auto/Bike</option>
+                                <option value="Van" {% if driver_info['vehicle_type'] == 'Van' %}selected{% endif %}>Van</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="vehicle_model" class="form-label">Vehicle Model</label>
+                            <input type="text" id="vehicle_model" name="vehicle_model" class="form-control" value="{{ driver_info['vehicle_model'] }}" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="vehicle_number" class="form-label">Vehicle Number</label>
+                            <input type="text" id="vehicle_number" name="vehicle_number" class="form-control" value="{{ driver_info['vehicle_number'] }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="total_seats" class="form-label">Total Passenger Seats</label>
+                    <input type="number" id="total_seats" name="total_seats" class="form-control" min="1" max="15" value="{{ driver_info['total_seats'] }}" required>
+                </div>
+            {% endif %}
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary">Save Profile Changes</button>
+                <a href="javascript:history.back()" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Ride History – RideShare{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+        <h2 style="color: var(--primary); margin: 0;">Ride History</h2>
+        <p style="color: var(--gray-600); font-size: 0.95rem; margin-top: 0.25rem;">
+            A permanent log of all your completed journeys.
+        </p>
+    </div>
+    <a href="{{ url_for('rider.dashboard') }}" class="btn btn-outline btn-sm">← Back to Dashboard</a>
+</div>
+
+{% if bookings %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Trip Date</th>
+                        <th>Route</th>
+                        <th>Driver</th>
+                        <th>Vehicle</th>
+                        <th>Seats</th>
+                        <th>Total Paid</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                        <tr>
+                            <td>
+                                <strong>{{ b['ride_date'] }}</strong><br>
+                                <small style="color: var(--gray-600);">{{ b['departure_time'] }}</small>
+                            </td>
+                            <td>
+                                <div><span class="route-dot pickup" style="display:inline-block; margin-right:4px;"></span> {{ b['pickup_location'] }}</div>
+                                <div><span class="route-dot destination" style="display:inline-block; margin-right:4px;"></span> {{ b['destination'] }}</div>
+                            </td>
+                            <td>{{ b['driver_name'] }}</td>
+                            <td>{{ b['vehicle_type'] }} ({{ b['vehicle_model'] }})</td>
+                            <td>{{ b['seats_requested'] }}</td>
+                            <td><strong style="color: #15803d;">₹{{ "%.0f"|format(b['total_fare']) }}</strong></td>
+                            <td><span class="badge badge-completed">Completed</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📜</div>
+        <h3>No completed rides</h3>
+        <p style="color: var(--gray-600);">
+            Once you book a ride and the driver marks the journey as completed, it will appear here.
+        </p>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Rider Dashboard – RideShare{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Rider Sidebar (Section 11) -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-user-info">
+            <div class="user-avatar-circle">
+                {{ session.get('name', 'R')[0]|upper }}
+            </div>
+            <strong>{{ session.get('name') }}</strong>
+            <div><span class="role-badge rider">Rider</span></div>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="{{ url_for('rider.dashboard') }}" class="sidebar-link active">📊 Dashboard</a></li>
+            <li><a href="{{ url_for('rider.search') }}" class="sidebar-link">🔍 Find Ride</a></li>
+            <li><a href="{{ url_for('rider.my_bookings') }}" class="sidebar-link">📋 My Bookings</a></li>
+            <li><a href="{{ url_for('rider.ride_history') }}" class="sidebar-link">📜 Ride History</a></li>
+            <li><a href="{{ url_for('main.profile') }}" class="sidebar-link">⚙️ Profile</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: var(--danger);">🚪 Logout</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <section>
+        <!-- 4 Metric Cards (Section 11) -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">🚗</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ active_count }}</div>
+                    <div class="stat-label">Active Bookings</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber">⏳</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ pending_count }}</div>
+                    <div class="stat-label">Pending Requests</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">✅</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ completed_count }}</div>
+                    <div class="stat-label">Completed Rides</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">📈</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_count }}</div>
+                    <div class="stat-label">Total Rides</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Search Banner -->
+        <div class="card" style="background: linear-gradient(to right, #eff6ff, #f0fdf4); border: 1px solid #bfdbfe; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h3 style="color: var(--primary); margin-bottom: 0.25rem;">Looking for a ride?</h3>
+                    <p style="color: var(--gray-700); margin: 0; font-size: 0.95rem;">
+                        Search for available campus commuters or city travel partners.
+                    </p>
+                </div>
+                <a href="{{ url_for('rider.search') }}" class="btn btn-primary">Find Available Rides ➔</a>
+            </div>
+        </div>
+
+        <!-- Recent Bookings Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Bookings</h3>
+                <a href="{{ url_for('rider.my_bookings') }}" class="btn btn-outline btn-sm">View All Bookings</a>
+            </div>
+
+            {% if recent_bookings %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Driver & Vehicle</th>
+                                <th>Route</th>
+                                <th>Date & Time</th>
+                                <th>Seats</th>
+                                <th>Fare</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in recent_bookings %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ b['driver_name'] }}</strong><br>
+                                        <small style="color: var(--gray-600);">{{ b['vehicle_type'] }} ({{ b['vehicle_number'] }})</small>
+                                    </td>
+                                    <td>
+                                        <div><span class="route-dot pickup" style="display:inline-block; margin-right:4px;"></span> {{ b['pickup_location'] }}</div>
+                                        <div><span class="route-dot destination" style="display:inline-block; margin-right:4px;"></span> {{ b['destination'] }}</div>
+                                    </td>
+                                    <td>
+                                        {{ b['ride_date'] }}<br>
+                                        <small style="color: var(--gray-600);">{{ b['departure_time'] }}</small>
+                                    </td>
+                                    <td><strong>{{ b['seats_requested'] }}</strong></td>
+                                    <td><strong>₹{{ "%.0f"|format(b['total_fare']) }}</strong></td>
+                                    <td>
+                                        <span class="badge badge-{{ b['status']|lower }}">{{ b['status'] }}</span>
+                                    </td>
+                                    <td>
+                                        {% if b['status'] == 'Pending' %}
+                                            <form action="{{ url_for('rider.cancel_booking', booking_id=b['id']) }}" method="POST" onsubmit="return confirm('Cancel this pending ride request?');">
+                                                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                                            </form>
+                                        {% else %}
+                                            <span style="color: var(--gray-500); font-size: 0.8rem;">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                    <p>You have not booked any rides yet.</p>
+                    <a href="{{ url_for('rider.search') }}" class="btn btn-primary btn-sm" style="margin-top: 0.5rem;">Browse Rides Now</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

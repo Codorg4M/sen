@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}RideShare – Share rides. Save time. Travel together.{% endblock %}
+
+{% block content %}
+<!-- 1. HERO SECTION -->
+<section class="hero-section">
+    <div class="container hero-content">
+        <h1 class="hero-title">RideShare</h1>
+        <p class="hero-tagline">"Share rides. Save time. Travel together."</p>
+       
+        <div class="hero-cta">
+            {% if session.get('user_id') %}
+                {% if session.get('role') == 'rider' %}
+                    <a href="{{ url_for('rider.search') }}" class="btn btn-primary btn-lg" style="background: #ffffff; color: var(--primary);">Find a Ride</a>
+                    <a href="{{ url_for('rider.dashboard') }}" class="btn btn-outline btn-lg" style="color: #ffffff; border-color: #ffffff;">Rider Dashboard</a>
+                {% elif session.get('role') == 'driver' %}
+                    <a href="{{ url_for('driver.create_ride') }}" class="btn btn-primary btn-lg" style="background: #ffffff; color: var(--primary);">Post a Ride</a>
+                    <a href="{{ url_for('driver.dashboard') }}" class="btn btn-outline btn-lg" style="color: #ffffff; border-color: #ffffff;">Driver Dashboard</a>
+                {% elif session.get('role') == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-lg" style="background: #ffffff; color: var(--primary);">Admin Dashboard</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg" style="background: #ffffff; color: var(--primary);">Get Started / Login</a>
+                <a href="{{ url_for('auth.register_rider') }}" class="btn btn-secondary btn-lg">Join as Rider</a>
+                <a href="{{ url_for('auth.register_driver') }}" class="btn btn-outline btn-lg" style="color: #ffffff; border-color: #ffffff;">Join as Driver</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- DEMO CREDENTIALS CALLOUT BOX -->
+<div class="demo-box">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <h3 style="color: var(--primary); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+            <span>🎓</span> Academic Evaluation Demo Accounts
+        </h3>
+        <span class="badge badge-available">Pre-Seeded & Ready</span>
+    </div>
+    <p style="font-size: 0.9rem; color: var(--gray-600); margin: 0.5rem 0 1rem;">
+        The system has been pre-loaded with realistic accounts and mock rides. Click any account to test role flows immediately:
+    </p>
+    <div class="demo-account-grid">
+        <div class="demo-card">
+            <strong>👤 Rider Account:</strong><br>
+            Email: <code style="color: var(--primary);">rider@demo.com</code><br>
+            Password: <code>Rider@123</code><br>
+            <a href="{{ url_for('auth.login') }}?demo=rider" class="btn btn-outline-primary btn-sm" style="margin-top: 0.5rem; width: 100%;">Login as Rider</a>
+        </div>
+        <div class="demo-card">
+            <strong>🚗 Driver Account:</strong><br>
+            Email: <code style="color: var(--secondary);">driver@demo.com</code><br>
+            Password: <code>Driver@123</code><br>
+            <a href="{{ url_for('auth.login') }}?demo=driver" class="btn btn-outline-primary btn-sm" style="margin-top: 0.5rem; width: 100%;">Login as Driver</a>
+        </div>
+        <div class="demo-card">
+            <strong>🛡️ Admin Account:</strong><br>
+            Email: <code style="color: #b45309;">admin@demo.com</code><br>
+            Password: <code>Admin@123</code><br>
+            <a href="{{ url_for('auth.login') }}?demo=admin" class="btn btn-outline-primary btn-sm" style="margin-top: 0.5rem; width: 100%;">Login as Admin</a>
+        </div>
+    </div>
+</div>
+
+<!-- 2. HOW IT WORKS SECTION -->
+<section style="margin: 3.5rem 0;">
+    <div class="section-title-wrap">
+        <h2>How RideShare Works</h2>
+        <p class="section-subtitle">A straightforward 4-step workflow connecting college commuters and city travelers.</p>
+    </div>
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-number">1</div>
+            <h4>Search & Select</h4>
+            <p style="font-size: 0.875rem; color: var(--gray-600);">
+                Riders search available rides by pickup location, destination, travel date, and passenger count.
+            </p>
+        </div>
+        <div class="step-card">
+            <div class="step-number">2</div>
+            <h4>Request Booking</h4>
+            <p style="font-size: 0.875rem; color: var(--gray-600);">
+                Select seats requested with instant fare estimation (Base ₹30 + ₹12/km). Request status initializes as 'Pending'.
+            </p>
+        </div>
+        <div class="step-card">
+            <div class="step-number">3</div>
+            <h4>Driver Decision</h4>
+            <p style="font-size: 0.875rem; color: var(--gray-600);">
+                Driver reviews the request, verifies capacity, and accepts or rejects. Available seats update automatically.
+            </p>
+        </div>
+        <div class="step-card">
+            <div class="step-number">4</div>
+            <h4>Ride & Complete</h4>
+            <p style="font-size: 0.875rem; color: var(--gray-600);">
+                Once journey concludes, driver marks the ride completed. The trip is securely preserved in both users' ride history.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- 3. FEATURED AVAILABLE RIDES PREVIEW -->
+<section style="margin: 3.5rem 0;">
+    <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+        <div>
+            <h2>Available Campus & City Rides</h2>
+            <p class="section-subtitle">Real rides currently posted in the database ready for booking.</p>
+        </div>
+        <a href="{{ url_for('rider.search') }}" class="btn btn-outline-primary">View All Rides →</a>
+    </div>
+
+    <div class="ride-grid">
+        {% for ride in featured_rides %}
+            <div class="ride-card">
+                <div class="ride-card-header">
+                    <div>
+                        <strong style="color: var(--primary);">{{ ride['vehicle_type'] }}</strong>
+                        <span style="color: var(--gray-500); font-size: 0.8rem;">({{ ride['vehicle_model'] }})</span>
+                    </div>
+                    <span class="badge badge-available">{{ ride['status'] }}</span>
+                </div>
+                <div class="ride-card-body">
+                    <div class="route-step">
+                        <span class="route-dot pickup"></span>
+                        <div>
+                            <div class="meta-label">Pickup</div>
+                            <strong>{{ ride['pickup_location'] }}</strong>
+                        </div>
+                    </div>
+                    <div class="route-line"></div>
+                    <div class="route-step">
+                        <span class="route-dot destination"></span>
+                        <div>
+                            <div class="meta-label">Destination</div>
+                            <strong>{{ ride['destination'] }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="ride-meta-grid">
+                        <div class="meta-item">
+                            <span class="meta-label">Date & Time</span>
+                            <span class="meta-val">{{ ride['ride_date'] }} @ {{ ride['departure_time'] }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Seats Available</span>
+                            <span class="meta-val" style="color: var(--secondary);">{{ ride['available_seats'] }} Seat(s)</span>
+                        </div>
+                    </div>
+
+                    <div class="fare-banner">
+                        <span>Estimated Fare:</span>
+                        <span class="fare-amount">₹{{ "%.0f"|format(ride['fare_per_passenger']) }}</span>
+                    </div>
+                    <span class="fare-disclaimer">Project / Demo Calculation</span>
+
+                    <div style="margin-top: 1rem;">
+                        {% if session.get('role') == 'rider' %}
+                            <a href="{{ url_for('rider.search', pickup=ride['pickup_location'], destination=ride['destination']) }}" class="btn btn-primary btn-block">Book This Ride</a>
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-block">Login to Book</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                <p>No rides currently scheduled. Drivers can log in and create new rides!</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- 4. RIDER & DRIVER SHOWCASE SECTIONS -->
+<div class="form-row" style="margin: 3.5rem 0;">
+    <div class="form-col">
+        <div class="card" style="height: 100%; border-top: 4px solid var(--primary);">
+            <h3 style="color: var(--primary); margin-bottom: 0.75rem;">👤 For Commuters & Riders</h3>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                <li>✓ Quick search by pickup, destination, and travel date</li>
+                <li>✓ Transparent demo fare calculation per passenger</li>
+                <li>✓ Track pending, accepted, and rejected booking statuses</li>
+                <li>✓ Seamless cancellation for pending reservations</li>
+                <li>✓ Personal ride history and account profile management</li>
+            </ul>
+            <a href="{{ url_for('auth.register_rider') }}" class="btn btn-primary">Sign Up as Rider</a>
+        </div>
+    </div>
+    <div class="form-col">
+        <div class="card" style="height: 100%; border-top: 4px solid var(--secondary);">
+            <h3 style="color: var(--secondary); margin-bottom: 0.75rem;">🚗 For Vehicle Owners & Drivers</h3>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                <li>✓ Publish empty seats along your daily college or office route</li>
+                <li>✓ Automated route distance and recommended fare estimation</li>
+                <li>✓ Accept or reject incoming rider requests with real-time seat decrement</li>
+                <li>✓ Built-in overbooking prevention and capacity guard</li>
+                <li>✓ Complete rides and view past journey logs</li>
+            </ul>
+            <a href="{{ url_for('auth.register_driver') }}" class="btn btn-secondary">Register as Driver</a>
+        </div>
+    </div>
+</div>
+
+<!-- 5. INTERACTIVE MAP PREVIEW (LEAFLET / OPENSTREETMAP) -->
+<section style="margin: 3.5rem 0;">
+    <div class="section-title-wrap">
+        <h2>Interactive Route Preview (OpenStreetMap)</h2>
+        <p class="section-subtitle">Visualizing pickup and destination routes using open-source Leaflet mapping.</p>
+    </div>
+    <div class="card" style="padding: 1.25rem;">
+        <div id="map-container"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--gray-600); flex-wrap: wrap; gap: 0.5rem;">
+            <span>📍 Visualizing Route: <strong>College Road</strong> ➔ <strong>Railway Station</strong></span>
+            <span>Zero paid APIs • OpenStreetMap Open Data</span>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize OpenStreetMap centered on demo coordinates
+        initRideShareMap('map-container', [28.6139, 77.2090], [28.6448, 77.2167]);
+    });
+</script>
+{% endblock %}

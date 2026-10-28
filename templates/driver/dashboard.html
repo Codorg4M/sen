@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Driver Dashboard – RideShare{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Driver Sidebar (Section 11) -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-user-info">
+            <div class="user-avatar-circle" style="background: #ccfbf1; color: #0f766e;">
+                {{ session.get('name', 'D')[0]|upper }}
+            </div>
+            <strong>{{ session.get('name') }}</strong>
+            <div><span class="role-badge driver">Driver Partner</span></div>
+            <div style="font-size: 0.8rem; color: var(--gray-600); margin-top: 0.25rem;">
+                {{ driver['vehicle_model'] }} ({{ driver['vehicle_number'] }})
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="{{ url_for('driver.dashboard') }}" class="sidebar-link active">📊 Dashboard</a></li>
+            <li><a href="{{ url_for('driver.create_ride') }}" class="sidebar-link">➕ Create Ride</a></li>
+            <li><a href="{{ url_for('driver.my_rides') }}" class="sidebar-link">🚗 My Rides</a></li>
+            <li>
+                <a href="{{ url_for('driver.ride_requests') }}" class="sidebar-link">
+                    📬 Ride Requests
+                    {% if pending_requests_count > 0 %}
+                        <span class="badge badge-pending" style="margin-left: auto;">{{ pending_requests_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            <li><a href="{{ url_for('driver.completed_rides') }}" class="sidebar-link">✅ Completed Rides</a></li>
+            <li><a href="{{ url_for('main.profile') }}" class="sidebar-link">⚙️ Profile</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: var(--danger);">🚪 Logout</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <section>
+        <!-- 4 Metric Cards (Section 11) -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon teal">🚗</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ active_rides_count }}</div>
+                    <div class="stat-label">Active Rides</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber">⏳</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ pending_requests_count }}</div>
+                    <div class="stat-label">Pending Requests</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">💺</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ available_seats_count }}</div>
+                    <div class="stat-label">Available Seats</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">🏁</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ completed_rides_count }}</div>
+                    <div class="stat-label">Completed Rides</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Ride Quick Action Banner -->
+        <div class="card" style="background: linear-gradient(to right, #ccfbf1, #eff6ff); border: 1px solid #99f6e4; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h3 style="color: #0f766e; margin-bottom: 0.25rem;">Heading somewhere soon?</h3>
+                    <p style="color: var(--gray-700); margin: 0; font-size: 0.95rem;">
+                        Publish your empty vehicle seats and share journey costs with fellow commuters.
+                    </p>
+                </div>
+                <a href="{{ url_for('driver.create_ride') }}" class="btn btn-secondary">+ Post a New Ride</a>
+            </div>
+        </div>
+
+        <!-- Urgent: Pending Ride Requests Table -->
+        {% if pending_requests %}
+            <div class="card" style="border-left: 4px solid var(--warning);">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title" style="color: #b45309;">⚠️ Incoming Ride Requests</h3>
+                        <span style="font-size: 0.85rem; color: var(--gray-600);">Riders waiting for your confirmation</span>
+                    </div>
+                    <a href="{{ url_for('driver.ride_requests') }}" class="btn btn-outline btn-sm">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Rider</th>
+                                <th>Route</th>
+                                <th>Date & Time</th>
+                                <th>Seats</th>
+                                <th>Fare</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in pending_requests %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ req['rider_name'] }}</strong><br>
+                                        <small style="color: var(--gray-600);">📞 {{ req['rider_phone'] }}</small>
+                                    </td>
+                                    <td>
+                                        <div>{{ req['pickup_location'] }} ➔ {{ req['destination'] }}</div>
+                                    </td>
+                                    <td>{{ req['ride_date'] }} @ {{ req['departure_time'] }}</td>
+                                    <td><strong>{{ req['seats_requested'] }} Seat(s)</strong></td>
+                                    <td><strong style="color: #15803d;">₹{{ "%.0f"|format(req['total_fare']) }}</strong></td>
+                                    <td>
+                                        <div style="display: flex; gap: 0.4rem;">
+                                            <form action="{{ url_for('driver.accept_request', booking_id=req['id']) }}" method="POST">
+                                                <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                                            </form>
+                                            <form action="{{ url_for('driver.reject_request', booking_id=req['id']) }}" method="POST">
+                                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Recent Rides -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">My Recent Rides</h3>
+                <a href="{{ url_for('driver.my_rides') }}" class="btn btn-outline btn-sm">View All Rides</a>
+            </div>
+
+            {% if recent_rides %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Route</th>
+                                <th>Schedule</th>
+                                <th>Seats Left</th>
+                                <th>Fare</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in recent_rides %}
+                                <tr>
+                                    <td>
+                                        <div><span class="route-dot pickup" style="display:inline-block; margin-right:4px;"></span> {{ r['pickup_location'] }}</div>
+                                        <div><span class="route-dot destination" style="display:inline-block; margin-right:4px;"></span> {{ r['destination'] }}</div>
+                                    </td>
+                                    <td>{{ r['ride_date'] }}<br><small style="color: var(--gray-600);">{{ r['departure_time'] }}</small></td>
+                                    <td><strong>{{ r['available_seats'] }}</strong></td>
+                                    <td>₹{{ "%.0f"|format(r['fare_per_passenger']) }}</td>
+                                    <td><span class="badge badge-{{ r['status']|lower }}">{{ r['status'] }}</span></td>
+                                    <td>
+                                        {% if r['status'] in ('Available', 'Full', 'Ongoing') %}
+                                            <div style="display: flex; gap: 0.35rem;">
+                                                <form action="{{ url_for('driver.complete_ride', ride_id=r['id']) }}" method="POST" onsubmit="return confirm('Mark this ride as completed?');">
+                                                    <button type="submit" class="btn btn-success btn-sm">Mark Complete</button>
+                                                </form>
+                                                <form action="{{ url_for('driver.cancel_ride', ride_id=r['id']) }}" method="POST" onsubmit="return confirm('Cancel this ride?');">
+                                                    <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                                                </form>
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--gray-500); font-size: 0.8rem;">Finished</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                    <p>You have not posted any rides yet.</p>
+                    <a href="{{ url_for('driver.create_ride') }}" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">Create Your First Ride</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

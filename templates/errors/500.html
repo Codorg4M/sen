@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}500 Server Error – RideShare{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 3rem auto; text-align: center; padding: 3rem 2rem;">
+    <div style="font-size: 3.5rem; margin-bottom: 1rem;">⚠️</div>
+    <h2 style="margin-bottom: 0.5rem;">Internal Error (500)</h2>
+    <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+        Something went wrong while processing your request. Please try again or return to the main dashboard.
+    </p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary">Return to Home</a>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}User Management – Admin Console{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+        <h2 style="color: var(--primary); margin: 0;">User Management</h2>
+        <p style="color: var(--gray-600); font-size: 0.95rem; margin-top: 0.25rem;">
+            View registered platform users, check role assignments, and toggle account activation.
+        </p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline btn-sm">← Back to Console</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name & Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Registered At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                    <tr>
+                        <td>#USR-{{ u['id'] }}</td>
+                        <td>
+                            <strong>{{ u['name'] }}</strong><br>
+                            <small style="color: var(--gray-600);">{{ u['email'] }}</small>
+                        </td>
+                        <td>{{ u['phone'] }}</td>
+                        <td><span class="role-badge {{ u['role'] }}">{{ u['role'] }}</span></td>
+                        <td><span class="badge badge-{{ u['status'] }}">{{ u['status'] }}</span></td>
+                        <td><small>{{ u['created_at'] }}</small></td>
+                        <td>
+                            {% if u['id'] != session.get('user_id') %}
+                                <form action="{{ url_for('admin.toggle_user', user_id=u['id']) }}" method="POST" onsubmit="return confirm('Toggle status for {{ u['name'] }}?');">
+                                    <button type="submit" class="btn btn-sm {% if u['status'] == 'active' %}btn-danger{% else %}btn-success{% endif %}">
+                                        {% if u['status'] == 'active' %}Deactivate{% else %}Activate{% endif %}
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span style="font-size: 0.8rem; color: var(--gray-500); font-style: italic;">Current Admin</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

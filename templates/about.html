@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}About & Software Engineering Specs – RideShare{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Software Engineering Project Specification</h1>
+    <p class="section-subtitle">
+        Academic Documentation & Architectural Overview of <strong>RideShare</strong> – College-level Mini Project.
+    </p>
+</div>
+
+<div class="form-row">
+    <!-- Left Column: Core Concepts -->
+    <div class="form-col" style="flex: 2;">
+        <div class="card">
+            <h3>1. Project Objectives & Problem Statement</h3>
+            <p>
+                Urban and college campus commuters frequently travel along identical corridors with single-occupancy vehicles, resulting in high travel expenses and unnecessary congestion. <strong>RideShare</strong> provides a functional, decentralized web platform allowing verified drivers to list available vehicle seats and riders to search, book, and commute economically.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>2. System Actors & Roles</h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                <div style="background: var(--gray-50); padding: 1rem; border-left: 4px solid var(--primary); border-radius: 4px;">
+                    <strong>👤 Rider:</strong> Registers, searches available rides using location/date filters, submits seat booking requests, tracks confirmation status, cancels pending bookings, and views ride history.
+                </div>
+                <div style="background: var(--gray-50); padding: 1rem; border-left: 4px solid var(--secondary); border-radius: 4px;">
+                    <strong>🚗 Driver:</strong> Registers with vehicle specification & driving license, creates ride listings, reviews incoming passenger requests, accepts/rejects bookings with automatic seat allocation, and marks trips completed.
+                </div>
+                <div style="background: var(--gray-50); padding: 1rem; border-left: 4px solid #b45309; border-radius: 4px;">
+                    <strong>🛡️ Administrator:</strong> Oversees system health, monitors all platform users, activates/deactivates accounts, reviews all rides/bookings, and moderates content.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>3. State Machine & Transitions</h3>
+            <div class="form-row">
+                <div class="form-col">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Ride Lifecycle</h4>
+                    <ul style="font-size: 0.9rem; line-height: 1.8;">
+                        <li><code>Available</code> ➔ Initial post state with seats &gt; 0.</li>
+                        <li><code>Full</code> ➔ Auto-triggered when remaining seats = 0.</li>
+                        <li><code>Completed</code> ➔ Driver marks journey finished.</li>
+                        <li><code>Cancelled</code> ➔ Driver cancels trip (notifies riders).</li>
+                    </ul>
+                </div>
+                <div class="form-col">
+                    <h4 style="color: var(--secondary); margin-bottom: 0.5rem;">Booking Lifecycle</h4>
+                    <ul style="font-size: 0.9rem; line-height: 1.8;">
+                        <li><code>Pending</code> ➔ Rider requests seats.</li>
+                        <li><code>Accepted</code> ➔ Driver accepts (seats deducted).</li>
+                        <li><code>Rejected</code> ➔ Driver rejects (seats preserved).</li>
+                        <li><code>Cancelled</code> ➔ Rider cancels (seats refunded).</li>
+                        <li><code>Completed</code> ➔ Journey marked completed.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>4. Fare Estimation Formula</h3>
+            <div class="fare-banner" style="margin-top: 0.5rem;">
+                <div>
+                    <strong>Formula:</strong> <code>Estimated Fare = Base Fare + (Distance in KM × Rate per KM)</code><br>
+                    <small>Default Parameters: Base Fare = ₹30.00 | Rate per KM = ₹12.00</small>
+                </div>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--gray-600); margin-top: 0.5rem;">
+                * Notice: Fare calculation is strictly a simulated demonstration value for academic evaluation and does not connect to real financial gateways.
+            </p>
+        </div>
+    </div>
+
+    
+
+       
+        
+    
+</div>
+{% endblock %}

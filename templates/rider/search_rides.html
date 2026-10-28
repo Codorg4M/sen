@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Search & Book Rides – RideShare{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h2 style="color: var(--primary); margin-bottom: 0.5rem;">Find a Ride</h2>
+    <p style="color: var(--gray-600); font-size: 0.95rem; margin-bottom: 1.25rem;">
+        Search shared campus and city rides by location, date, vehicle type, and required seats.
+    </p>
+
+    <!-- Search Form (Section 3 & 12) -->
+    <form action="{{ url_for('rider.search') }}" method="GET">
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="pickup" class="form-label">Pickup Location</label>
+                    <input type="text" id="pickup" name="pickup" class="form-control" placeholder="e.g. College Road" value="{{ pickup or '' }}">
+                </div>
+            </div>
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="destination" class="form-label">Destination</label>
+                    <input type="text" id="destination" name="destination" class="form-control" placeholder="e.g. Railway Station" value="{{ destination or '' }}">
+                </div>
+            </div>
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="date" class="form-label">Travel Date</label>
+                    <input type="date" id="date" name="date" class="form-control" value="{{ ride_date or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="vehicle_type" class="form-label">Preferred Vehicle Type</label>
+                    <select id="vehicle_type" name="vehicle_type" class="form-control">
+                        <option value="all">All Vehicle Types</option>
+                        <option value="Sedan" {% if vehicle_type == 'Sedan' %}selected{% endif %}>Sedan</option>
+                        <option value="Hatchback" {% if vehicle_type == 'Hatchback' %}selected{% endif %}>Hatchback</option>
+                        <option value="SUV" {% if vehicle_type == 'SUV' %}selected{% endif %}>SUV</option>
+                        <option value="Auto/Bike" {% if vehicle_type == 'Auto/Bike' %}selected{% endif %}>Auto/Bike</option>
+                        <option value="Van" {% if vehicle_type == 'Van' %}selected{% endif %}>Van</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="passengers" class="form-label">Required Seats</label>
+                    <input type="number" id="passengers" name="passengers" class="form-control" min="1" max="6" value="{{ passengers or 1 }}">
+                </div>
+            </div>
+            <div class="form-col" style="display: flex; align-items: flex-end; margin-bottom: 1.25rem;">
+                <button type="submit" class="btn btn-primary btn-block">Search Rides</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Available Rides Results -->
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 1rem;">
+    <h3>Available Rides ({{ rides|length }} found)</h3>
+    <a href="{{ url_for('rider.search') }}" class="btn btn-outline btn-sm">Clear Filters</a>
+</div>
+
+{% if rides %}
+    <div class="ride-grid">
+        {% for ride in rides %}
+            <div class="ride-card">
+                <div class="ride-card-header">
+                    <div>
+                        <strong style="color: var(--primary);">{{ ride['driver_name'] }}</strong>
+                        <div style="font-size: 0.8rem; color: var(--gray-600);">
+                            {{ ride['vehicle_type'] }} • {{ ride['vehicle_number'] }}
+                        </div>
+                    </div>
+                    <span class="badge badge-available">{{ ride['status'] }}</span>
+                </div>
+
+                <div class="ride-card-body">
+                    <div class="route-step">
+                        <span class="route-dot pickup"></span>
+                        <div>
+                            <div class="meta-label">Pickup Location</div>
+                            <strong>{{ ride['pickup_location'] }}</strong>
+                        </div>
+                    </div>
+                    <div class="route-line"></div>
+                    <div class="route-step">
+                        <span class="route-dot destination"></span>
+                        <div>
+                            <div class="meta-label">Destination</div>
+                            <strong>{{ ride['destination'] }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="ride-meta-grid">
+                        <div class="meta-item">
+                            <span class="meta-label">Departure Date & Time</span>
+                            <span class="meta-val">{{ ride['ride_date'] }} at {{ ride['departure_time'] }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Available Seats</span>
+                            <span class="meta-val" style="color: var(--secondary);">{{ ride['available_seats'] }} Remaining</span>
+                        </div>
+                    </div>
+
+                    <!-- Estimated Fare Display (Section 6) -->
+                    <div class="fare-banner">
+                        <span>Fare per Passenger:</span>
+                        <span class="fare-amount">₹{{ "%.0f"|format(ride['fare_per_passenger']) }}</span>
+                    </div>
+                    <span class="fare-disclaimer">Estimated Fare: ₹{{ "%.0f"|format(ride['fare_per_passenger']) }} (Project / Demo Calculation)</span>
+
+                    <!-- Request Ride Form -->
+                    <form action="{{ url_for('rider.book_ride', ride_id=ride['id']) }}" method="POST" class="book-ride-form" data-available-seats="{{ ride['available_seats'] }}" style="margin-top: 1rem;">
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 0.75rem; color: var(--gray-600); display: block;">Seats to Book:</label>
+                                <select name="seats_requested" class="form-control" style="padding: 0.4rem 0.6rem;">
+                                    {% for s in range(1, (ride['available_seats'] + 1)) %}
+                                        <option value="{{ s }}" {% if s == (passengers|int) %}selected{% endif %}>{{ s }} Seat{% if s > 1 %}s{% endif %}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div style="flex: 1.5; align-self: flex-end;">
+                                <button type="submit" class="btn btn-primary btn-block">Request Ride</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+        <h3>No matching rides found</h3>
+        <p style="color: var(--gray-600); max-width: 500px; margin: 0 auto 1.5rem;">
+            No available rides matched your specific search criteria. Try modifying your pickup location, destination, or date.
+        </p>
+        <a href="{{ url_for('rider.search') }}" class="btn btn-primary">Reset Search Filters</a>
+    </div>
+{% endif %}
+{% endblock %}

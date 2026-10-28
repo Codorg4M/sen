@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RideShare{% endblock %} – Ride Sharing Application</title>
+    
+    <!-- Custom Clean Academic CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Leaflet OpenStreetMap CDN (Optional / Non-blocking) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="site-header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="{{ url_for('main.index') }}" class="brand-logo">
+                    <span class="logo-icon">🚗</span>
+                    <span>RideShare</span>
+                    <span class="brand-badge">Mini Project</span>
+                </a>
+
+                <!-- Mobile Navigation Toggle -->
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">☰</button>
+
+                <!-- Navigation Links -->
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="{{ url_for('main.index') }}" class="nav-link">Home</a></li>
+                    <li><a href="{{ url_for('main.about') }}" class="nav-link">About / SE Docs</a></li>
+
+                    {% if session.get('user_id') %}
+                        <!-- Role-based Navigation Links -->
+                        {% if session.get('role') == 'rider' %}
+                            <li><a href="{{ url_for('rider.dashboard') }}" class="nav-link">Dashboard</a></li>
+                            <li><a href="{{ url_for('rider.search') }}" class="nav-link">Find Ride</a></li>
+                            <li><a href="{{ url_for('rider.my_bookings') }}" class="nav-link">My Bookings</a></li>
+                            <li><a href="{{ url_for('rider.ride_history') }}" class="nav-link">History</a></li>
+                            <li><a href="{{ url_for('main.profile') }}" class="nav-link">Profile</a></li>
+                        {% elif session.get('role') == 'driver' %}
+                            <li><a href="{{ url_for('driver.dashboard') }}" class="nav-link">Dashboard</a></li>
+                            <li><a href="{{ url_for('driver.create_ride') }}" class="nav-link">Create Ride</a></li>
+                            <li><a href="{{ url_for('driver.my_rides') }}" class="nav-link">My Rides</a></li>
+                            <li><a href="{{ url_for('driver.ride_requests') }}" class="nav-link">Requests</a></li>
+                            <li><a href="{{ url_for('driver.completed_rides') }}" class="nav-link">Completed</a></li>
+                            <li><a href="{{ url_for('main.profile') }}" class="nav-link">Profile</a></li>
+                        {% elif session.get('role') == 'admin' %}
+                            <li><a href="{{ url_for('admin.dashboard') }}" class="nav-link">Dashboard</a></li>
+                            <li><a href="{{ url_for('admin.users') }}" class="nav-link">Users</a></li>
+                            <li><a href="{{ url_for('admin.drivers') }}" class="nav-link">Drivers</a></li>
+                            <li><a href="{{ url_for('admin.rides') }}" class="nav-link">Rides</a></li>
+                            <li><a href="{{ url_for('admin.bookings') }}" class="nav-link">Bookings</a></li>
+                        {% endif %}
+
+                        <!-- User Info & Logout -->
+                        <li>
+                            <span class="role-badge {{ session.get('role') }}">
+                                {{ session.get('role') }}
+                            </span>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Logout</a>
+                        </li>
+                    {% else %}
+                        <!-- Logged Out Links -->
+                        <li><a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-sm">Login</a></li>
+                        <li><a href="{{ url_for('auth.register_rider') }}" class="btn btn-primary btn-sm">Register as Rider</a></li>
+                        <li><a href="{{ url_for('auth.register_driver') }}" class="btn btn-secondary btn-sm">Drive with Us</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Flash Message Alerts -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <span>{{ message }}</span>
+                                <button type="button" class="alert-close">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3 class="footer-title">🚗 RideShare</h3>
+                    <p style="color: #94a3b8; font-size: 0.95rem;">
+                        "Share rides. Save time. Travel together."
+                    </p>
+                    <p style="color: #64748b; font-size: 0.825rem; margin-top: 0.5rem;">
+                        A complete Software Engineering mini project demonstrating modular design, role-based access control, relational database management, and robust booking workflows.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Navigation</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                        <li><a href="{{ url_for('main.about') }}">Software Engineering Specs</a></li>
+                        <li><a href="{{ url_for('auth.login') }}">User Login</a></li>
+                        <li><a href="{{ url_for('auth.register_rider') }}">Rider Sign Up</a></li>
+                        <li><a href="{{ url_for('auth.register_driver') }}">Driver Sign Up</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 RideShare – College Software Engineering Mini Project. Designed for academic demonstration.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

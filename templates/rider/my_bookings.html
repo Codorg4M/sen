@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}My Bookings – RideShare{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+        <h2 style="color: var(--primary); margin: 0;">My Bookings</h2>
+        <p style="color: var(--gray-600); font-size: 0.95rem; margin-top: 0.25rem;">
+            Track the status of your ride requests, view driver contact details, and manage active bookings.
+        </p>
+    </div>
+    <a href="{{ url_for('rider.search') }}" class="btn btn-primary">+ Book Another Ride</a>
+</div>
+
+{% if bookings %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Driver Details</th>
+                        <th>Route</th>
+                        <th>Date & Time</th>
+                        <th>Seats</th>
+                        <th>Total Fare</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                        <tr>
+                            <td>#BK-{{ b['id'] }}</td>
+                            <td>
+                                <strong>{{ b['driver_name'] }}</strong><br>
+                                <span style="font-size: 0.8rem; color: var(--gray-600);">
+                                    📞 {{ b['driver_phone'] }}<br>
+                                    {{ b['vehicle_type'] }} ({{ b['vehicle_number'] }})
+                                </span>
+                            </td>
+                            <td>
+                                <div><span class="route-dot pickup" style="display:inline-block; margin-right:4px;"></span> {{ b['pickup_location'] }}</div>
+                                <div><span class="route-dot destination" style="display:inline-block; margin-right:4px;"></span> {{ b['destination'] }}</div>
+                            </td>
+                            <td>
+                                {{ b['ride_date'] }}<br>
+                                <small style="color: var(--gray-600);">{{ b['departure_time'] }}</small>
+                            </td>
+                            <td><strong>{{ b['seats_requested'] }} Seat(s)</strong></td>
+                            <td>
+                                <strong style="color: #15803d;">₹{{ "%.0f"|format(b['total_fare']) }}</strong><br>
+                                <small style="color: var(--gray-500); font-size: 0.7rem;">Demo Calc</small>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ b['status']|lower }}">{{ b['status'] }}</span>
+                            </td>
+                            <td>
+                                {% if b['status'] in ('Pending', 'Accepted') %}
+                                    <form action="{{ url_for('rider.cancel_booking', booking_id=b['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                        <button type="submit" class="btn btn-danger btn-sm">Cancel Booking</button>
+                                    </form>
+                                {% elif b['status'] == 'Rejected' %}
+                                    <span style="font-size: 0.8rem; color: var(--danger);">Declined by driver</span>
+                                {% elif b['status'] == 'Completed' %}
+                                    <span style="font-size: 0.8rem; color: var(--success); font-weight: 600;">Trip Finished</span>
+                                {% else %}
+                                    <span style="font-size: 0.8rem; color: var(--gray-500);">Cancelled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🎫</div>
+        <h3>No bookings yet</h3>
+        <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+            You have not requested or booked any rides. Start by searching for rides along your route.
+        </p>
+        <a href="{{ url_for('rider.search') }}" class="btn btn-primary">Find a Ride</a>
+    </div>
+{% endif %}
+{% endblock %}
